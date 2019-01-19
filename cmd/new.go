@@ -1,4 +1,4 @@
-// Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2019 ken-aio
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,25 +21,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// newGenerateCmd is create generaet command instance
-func newGenerateCmd() *cobra.Command {
-	return generateCmd("generate")
-}
-
-// newGenerateCmdShort is create generaet short command instance
-func newGenerateCmdShort() *cobra.Command {
-	return generateCmd("g")
-}
-
-func generateCmd(name string) *cobra.Command {
+// newNewCmd represents the new command
+func newNewCmd(name string) *cobra.Command {
 	type options struct {
-		out string
-		all bool
+		dir string
 	}
 	o := &options{}
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("%s [name]", name),
-		Short: "Initialize goenum. create template yml files in goenum dir",
+		Short: "Generate new enum file",
 		Long:  ``,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
@@ -47,18 +37,26 @@ func generateCmd(name string) *cobra.Command {
 			}
 			return nil
 		},
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return validateParams(*o)
-		},
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("init called -o = %s\n", args[0])
+			fmt.Println("new called")
 		},
 	}
-	cmd.Flags().StringVarP(&o.out, "out", "o", "", "output dir for enum definition yaml")
-	cmd.Flags().BoolVarP(&o.all, "all", "a", true, "generate all enum files")
+
+	cmd.Flags().StringVarP(&o.dir, "dir", "d", "goenum", "output dir for enum yaml")
+
 	return cmd
 }
 
 func init() {
-	rootCmd.AddCommand(newGenerateCmd(), newGenerateCmdShort())
+	rootCmd.AddCommand(newNewCmd("new"), newNewCmd("n"))
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// newCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
