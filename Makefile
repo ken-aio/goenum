@@ -1,7 +1,9 @@
 NAME            := goenum
 VERSION         := v0.0.1
 REVISION        := $(shell git rev-parse --short HEAD)
-LDFLAGS         := "-X github.com/ken-aio/goenum/cmd.Version=${VERSION} -X github.com/ken-aio/goenum/cmd.Revision=${REVISION} -extldflags \"-static\""
+DATE            := $(shell date -uR)
+GOVERSION       := $(shell go version)
+LDFLAGS         := "-X github.com/ken-aio/goenum/cmd.Version=${VERSION} -X github.com/ken-aio/goenum/cmd.Revision=${REVISION} -X \"github.com/ken-aio/goenum/cmd.BuildDate=${DATE}\" -X \"github.com/ken-aio/goenum/cmd.GoVersion=${GOVERSION}\" -extldflags \"-static\""
 OSARCH          := "darwin/amd64 linux/amd64"
 GITHUB_USER     := ken-aio
 
