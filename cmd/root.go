@@ -13,7 +13,7 @@ var (
 	rootCmd = NewCmdRoot()
 )
 
-const configFileName = ".goenum.yml"
+const configFilePath = ".goenum.yml"
 
 // NewCmdRoot is create new cobra root instance
 func NewCmdRoot() *cobra.Command {
@@ -23,7 +23,7 @@ func NewCmdRoot() *cobra.Command {
 	}
 	cobra.OnInitialize(initConfig)
 
-	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is ./%s)", configFileName))
+	cmd.PersistentFlags().StringVar(&cfgFile, "config", configFilePath, fmt.Sprintf("config file (default is %s)", configFilePath))
 
 	return cmd
 }
@@ -43,13 +43,13 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		viper.AddConfigPath(".")
-		viper.SetConfigName(configFileName)
+		viper.SetConfigName(configFilePath)
 	}
 
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		//fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
 
