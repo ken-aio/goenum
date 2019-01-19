@@ -58,4 +58,5 @@ func generateCmd(name string) *cobra.Command {
 }
 
 func init() {
+	rootCmd.AddCommand(newGenerateCmd(), newGenerateCmdShort())
 }

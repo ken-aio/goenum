@@ -8,7 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	rootCmd = NewCmdRoot()
+)
 
 const configFileName = ".goenum.yml"
 
@@ -22,18 +25,15 @@ func NewCmdRoot() *cobra.Command {
 
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is ./%s)", configFileName))
 
-	cmd.AddCommand(newGenerateCmd(), newGenerateCmdShort())
-
 	return cmd
 }
 
 // Execute run command
 func Execute() {
-	cmd := NewCmdRoot()
-	cmd.SetOutput(os.Stdout)
-	if err := cmd.Execute(); err != nil {
-		cmd.SetOutput(os.Stderr)
-		cmd.Println(err)
+	rootCmd.SetOutput(os.Stdout)
+	if err := rootCmd.Execute(); err != nil {
+		rootCmd.SetOutput(os.Stderr)
+		rootCmd.Println(err)
 		os.Exit(1)
 	}
 }
@@ -51,4 +51,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func init() {
 }
