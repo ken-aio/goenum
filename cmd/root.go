@@ -55,3 +55,9 @@ func initConfig() {
 
 func init() {
 }
+
+// exists return true if path exists
+func exists(path string) bool {
+	_, err := os.Stat(configFilePath)
+	return err == nil
+}

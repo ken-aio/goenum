@@ -58,9 +58,7 @@ template:
 gofile:
   dir: app/enum
 `
-	_, err := os.Stat(configFilePath)
-	fileExists := err == nil
-	if fileExists {
+	if exists(configFilePath) {
 		fmt.Println(configFilePath + " is already exists.")
 		fmt.Printf("Do you really want to overwrite it? (\"yes\" overwrite or \"no\"): ")
 		if !askForConfirmation() {
@@ -74,9 +72,7 @@ gofile:
 
 func createTmplFile() error {
 	tmplDir := viper.GetString("template.dir")
-	_, err := os.Stat(tmplDir)
-	fileExists := err == nil
-	if !fileExists {
+	if !exists(tmplDir) {
 		if err := os.MkdirAll(tmplDir, 0755); err != nil {
 			return errors.Wrapf(err, "error occurred when create template dir: %s", tmplDir)
 		}
