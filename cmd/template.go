@@ -19,9 +19,9 @@ func defaultTemplateFile() string {
 package {{.PackageName}}
 
 // {{.Name}} {{.Description}}
-type {{.EnumName}} int
+type {{.Name}} int
 
-// {{.EnumName}} enum
+// {{.Name}} enum
 const (
 {{range $i, $v := .Enums}}
 	{{if eq $i 0}}

@@ -15,10 +15,16 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"html/template"
+	"os"
+	"strings"
 
+	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	funk "github.com/thoas/go-funk"
 )
 
 // newNewCmd represents the new command
@@ -28,7 +34,7 @@ func newNewCmd(name string) *cobra.Command {
 	}
 	o := &options{}
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("%s [name]", name),
+		Use:   fmt.Sprintf("%s [name] [key:value] [key:value]...", name),
 		Short: "Generate new enum file",
 		Long:  ``,
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -37,8 +43,8 @@ func newNewCmd(name string) *cobra.Command {
 			}
 			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("new called")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runNewCmd(args[0], args[1:])
 		},
 	}
 
@@ -59,4 +65,53 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func runNewCmd(name string, values []string) error {
+	type enumData struct {
+		Name     string
+		ValueMap map[string]string
+	}
+	tmpl, err := template.New("enumYaml").Parse(yamlTempate())
+	if err != nil {
+		return errors.Wrapf(err, "enum template reading error")
+	}
+
+	data := enumData{
+		Name:     strcase.ToCamel(name),
+		ValueMap: createValueMap(values),
+	}
+
+	outDir := viper.GetString("gofile.dir")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		return errors.Wrapf(err, "enum template output dir %s create error", outDir)
+	}
+
+	outPath := outDir + "/" + name + ".yml"
+	f, err := os.Create(outPath)
+	if err != nil {
+		return errors.Wrapf(err, "enum template output file %s create error", outPath)
+	}
+	if err := tmpl.Execute(f, data); err != nil {
+		return errors.Wrapf(err, "enum template execute error")
+	}
+	fmt.Printf("create new enum file: %s\n", outPath)
+	return nil
+}
+
+func yamlTempate() string {
+	return `# This file is goenum enum setting file auto generated. if you see more detail, https://github.com/ken-aio/goenume
+name: {{.Name}}
+description: |
+  This is {{.Name}} enums.
+values:{{range $k, $v := .ValueMap}}
+  {{$k}}: {{$v}}{{end}}
+`
+}
+
+func createValueMap(values []string) map[string]string {
+	return funk.Map(values, func(v string) (string, string) {
+		keyV := strings.Split(v, ":")
+		return strcase.ToCamel(keyV[0]), strcase.ToSnake(keyV[1])
+	}).(map[string]string)
 }

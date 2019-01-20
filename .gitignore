@@ -4,3 +4,4 @@ pkg/*
 
 goenum
 .goenum.yml
+/app
