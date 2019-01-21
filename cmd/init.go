@@ -96,22 +96,29 @@ type {{.Name}} int
 
 // {{.Name}} enum
 const (
-{{range $i, $v := .Enums}}
-	{{if eq $i 0}}
-	{{$v}} {{.Name}} = iota
-	{{else}}
-	{{$v}}
-	{{end}}
-{{end}}
+	Unkwon{{.Name}} {{.Name}} = iota
+	{{range .Enums}}{{.}}{{end}}
 )
 
-func (e {{Name}}) String() string {
-	names := [...]string{
-	{{range .EnumValues}}
-		"{{.}}",
-	{{end}}
+// {{.Name}}Names is return all {{.Name}} enum names.
+func {{.Name}}Names() []string {
+	return []string{
+		"unknown",{{range .EnumValues}}"{{.}}",{{end}}
 	}
-	return names[e]
+}
+
+// New{{.Name}} is create new {{.Name}} enum
+func New{{.Name}}(str string) {{.Name}} {
+	for i, name := range {{.Name}}Names() {
+		if str == name {
+			return {{.Name}}(i)
+		}
+	}
+	return Unknown{{.Name}}
+}
+
+func (e {{Name}}) String() string {
+	return {{.Name}}Names[e]
 }
 `
 }
