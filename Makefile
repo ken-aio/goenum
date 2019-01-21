@@ -18,7 +18,7 @@ GHR := $(GOBIN)/ghr
 
 $(LINT): ; @go get github.com/golang/lint/golint
 $(GOX): ; @go get github.com/mitchellh/gox
-$(ARCHIVER): ; @go get github.com/mholt/archiver/cmd/archiver
+$(ARCHIVER): ; @go get github.com/mholt/archiver/cmd/arc
 $(GHR): ; @go get github.com/tcnksm/ghr
 
 .DEFAULT_GOAL := build
@@ -44,7 +44,7 @@ cross-build: deps $(GOX)
 package: cross-build $(ARCHIVER)
 	rm -rf ./pkg && mkdir ./pkg && \
 	pushd out && \
-	find * -type d -exec archiver make ../pkg/{}.tar.gz {}/$(NAME) \; && \
+	find * -type d -exec arc archive ../pkg/{}.tar.gz {}/$(NAME) \; && \
 	popd
 
 .PHONY: release
