@@ -82,7 +82,7 @@ func runNewCmd(name string, values []string) error {
 		ValueMap: createValueMap(values),
 	}
 
-	outDir := viper.GetString("gofile.dir")
+	outDir := viper.GetString("yaml.dir")
 	if err := os.MkdirAll(outDir, 0755); err != nil {
 		return errors.Wrapf(err, "enum template output dir %s create error", outDir)
 	}

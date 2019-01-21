@@ -54,7 +54,9 @@ func runInitCmd() error {
 func createConfigFile() {
 	tmpl := `# This file is goenum settings auto generated. if you see more detail, https://github.com/ken-aio/goenum
 template:
-  dir: goenum
+  dir: goenum/template
+yaml:
+  dir: goenum/yaml
 gofile:
   dir: app/enum
 `
@@ -83,4 +85,33 @@ func createTmplFile() error {
 	}
 	fmt.Printf("create new template file : %s\n", tmplFile)
 	return nil
+}
+
+func defaultTemplateFile() string {
+	return `# This file is goenum template file auto generated. if you see more detail, https://github.com/ken-aio/goenume
+package {{.PackageName}}
+
+// {{.Name}} {{.Description}}
+type {{.Name}} int
+
+// {{.Name}} enum
+const (
+{{range $i, $v := .Enums}}
+	{{if eq $i 0}}
+	{{$v}} {{.Name}} = iota
+	{{else}}
+	{{$v}}
+	{{end}}
+{{end}}
+)
+
+func (e {{Name}}) String() string {
+	names := [...]string{
+	{{range .EnumValues}}
+		"{{.}}",
+	{{end}}
+	}
+	return names[e]
+}
+`
 }
