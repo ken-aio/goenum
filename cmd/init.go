@@ -88,7 +88,8 @@ func createTmplFile() error {
 }
 
 func defaultTemplateFile() string {
-	return `# This file is goenum template file auto generated. if you see more detail, https://github.com/ken-aio/goenume
+	return `// This file is goenum template file auto generated. if you see more detail, https://github.com/ken-aio/goenume
+
 package {{.PackageName}}
 
 // {{.Name}} {{.Description}}
@@ -96,14 +97,14 @@ type {{.Name}} int
 
 // {{.Name}} enum
 const (
-	Unkwon{{.Name}} {{.Name}} = iota
-	{{range .Enums}}{{.}}{{end}}
-)
+	Unknown{{.Name}} {{.Name}} = iota
+{{range $k, $v := .Values}}	{{$k}}
+{{end}})
 
 // {{.Name}}Names is return all {{.Name}} enum names.
 func {{.Name}}Names() []string {
 	return []string{
-		"unknown",{{range .EnumValues}}"{{.}}",{{end}}
+		"unknown",{{range $k, $v := .Values}}"{{$v}}",{{end}}
 	}
 }
 
@@ -117,8 +118,8 @@ func New{{.Name}}(str string) {{.Name}} {
 	return Unknown{{.Name}}
 }
 
-func (e {{Name}}) String() string {
-	return {{.Name}}Names[e]
+func (e {{.Name}}) String() string {
+	return {{.Name}}Names()[e]
 }
 `
 }

@@ -74,7 +74,7 @@ func runNewCmd(name string, values []string) error {
 	}
 	tmpl, err := template.New("enumYaml").Parse(yamlTempate())
 	if err != nil {
-		return errors.Wrapf(err, "enum template reading error")
+		return errors.Wrapf(err, "enum template create error")
 	}
 
 	data := enumData{
@@ -102,7 +102,7 @@ func runNewCmd(name string, values []string) error {
 func yamlTempate() string {
 	return `# This file is goenum enum setting file auto generated. if you see more detail, https://github.com/ken-aio/goenume
 name: {{.Name}}
-description: |
+description: |-
   This is {{.Name}} enums.
 values:{{range $k, $v := .ValueMap}}
   {{$k}}: {{$v}}{{end}}

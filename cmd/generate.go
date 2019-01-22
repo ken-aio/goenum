@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -32,8 +33,7 @@ type generateTmplData struct {
 	PackageName string
 	Name        string
 	Description string
-	Enums       []string
-	EnumValues  []string
+	Values      map[string]string
 }
 
 func generateCmd(name string) *cobra.Command {
@@ -108,31 +108,72 @@ func selectOneTarget(name string) ([]string, error) {
 }
 
 func doGenerate(name string) error {
-	data, err := readInput(name)
+	yaml, tmpl, err := readInput(name)
+	if err != nil {
+		return errors.Wrapf(err, "read file error: %s", name)
+	}
+	tmplData, err := convertData(yaml)
 	if err != nil {
 		return errors.Wrap(err, "read yaml error")
 	}
 
-	outDirs := strings.Split(viper.GetString("gofile.dir"), "/")
-	data.PackageName = strcase.ToSnake(outDirs[len(outDirs)-1])
+	if err := outputEnum(name, string(tmpl), tmplData); err != nil {
+		return errors.Wrap(err, "create enum go file error")
+	}
 	return nil
 }
 
-func readInput(name string) (*generateTmplData, error) {
+func readInput(name string) ([]byte, []byte, error) {
 	path := viper.GetString("yaml.dir") + "/" + name
 	if !exists(path) {
-		return nil, fmt.Errorf("input yaml file not found: %s", path)
+		return nil, nil, fmt.Errorf("input setting yaml file not found: %s", path)
 	}
-	file, err := ioutil.ReadFile(path)
+	yaml, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, errors.Wrapf(err, "read input yaml fale error: %s", path)
+		return nil, nil, errors.Wrapf(err, "read input setting yaml file error: %s", path)
 	}
 
-	resp := &generateTmplData{}
-	err = yaml.Unmarshal(file, &resp)
+	path = viper.GetString("template.dir") + "/" + tmplFileName
+	if !exists(path) {
+		return nil, nil, fmt.Errorf("enum template file not found: %s", path)
+	}
+	tmpl, err := ioutil.ReadFile(path)
 	if err != nil {
+		return nil, nil, errors.Wrapf(err, "read template file error: %s", path)
+	}
+	return yaml, tmpl, nil
+}
+
+func convertData(yamlData []byte) (*generateTmplData, error) {
+	resp := &generateTmplData{}
+	if err := yaml.Unmarshal(yamlData, &resp); err != nil {
 		return nil, errors.Wrapf(err, "yaml unmarshal error")
 	}
-	fmt.Printf("resp  = %+v\n", resp)
+	outDirs := strings.Split(viper.GetString("gofile.dir"), "/")
+	resp.PackageName = strcase.ToSnake(outDirs[len(outDirs)-1])
 	return resp, nil
+}
+
+func outputEnum(name, tmplStr string, data *generateTmplData) error {
+	outDir := viper.GetString("gofile.dir")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		return errors.Wrapf(err, "enum go file output dir %s create error", outDir)
+	}
+
+	tmpl, err := template.New("enumYaml").Parse(tmplStr)
+	if err != nil {
+		return errors.Wrap(err, "enum template create error")
+	}
+
+	name = strings.Split(name, ".")[0]
+	outPath := outDir + "/" + name + ".go"
+	f, err := os.Create(outPath)
+	if err != nil {
+		return errors.Wrapf(err, "enum go file create error: %s", outPath)
+	}
+	if err := tmpl.Execute(f, data); err != nil {
+		return errors.Wrapf(err, "enum template execute error")
+	}
+	fmt.Printf("create new enum file: %s\n", outPath)
+	return nil
 }
