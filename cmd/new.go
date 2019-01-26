@@ -24,7 +24,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	funk "github.com/thoas/go-funk"
 )
 
 // newNewCmd represents the new command
@@ -68,18 +67,28 @@ func init() {
 }
 
 func runNewCmd(name string, values []string) error {
+	type valueMap struct {
+		Key   string
+		Value string
+	}
 	type enumData struct {
 		Name     string
-		ValueMap map[string]string
+		ValueMap []*valueMap
 	}
 	tmpl, err := template.New("enumYaml").Parse(yamlTempate())
 	if err != nil {
 		return errors.Wrapf(err, "enum template create error")
 	}
 
+	valueMaps := make([]*valueMap, len(values))
+	for i, value := range values {
+		kv := strings.Split(value, ":")
+		valueMaps[i] = &valueMap{Key: strcase.ToCamel(kv[0]), Value: strcase.ToSnake(kv[1])}
+	}
+
 	data := enumData{
 		Name:     strcase.ToCamel(name),
-		ValueMap: createValueMap(values),
+		ValueMap: valueMaps,
 	}
 
 	outDir := viper.GetString("yaml.dir")
@@ -104,14 +113,7 @@ func yamlTempate() string {
 name: {{.Name}}
 description: |-
   This is {{.Name}} enums.
-values:{{range $k, $v := .ValueMap}}
-  {{$k}}: {{$v}}{{end}}
+values:{{range .ValueMap}}
+  {{.Key}}: {{.Value}}{{end}}
 `
-}
-
-func createValueMap(values []string) map[string]string {
-	return funk.Map(values, func(v string) (string, string) {
-		keyV := strings.Split(v, ":")
-		return strcase.ToCamel(keyV[0]), strcase.ToSnake(keyV[1])
-	}).(map[string]string)
 }
