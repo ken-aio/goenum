@@ -108,6 +108,13 @@ func {{.Name}}Names() []string {
 	}
 }
 
+// {{.Name}}List is return all {{.Name}} enums.
+func {{.Name}}List() []{{.Name}} {
+	return []{{.Name}}{
+		Unknown{{.Name}},{{range .Values}}{{.Key}},{{end}}
+	}
+}
+
 // New{{.Name}} is create new {{.Name}} enum
 func New{{.Name}}(str string) {{.Name}} {
 	for i, name := range {{.Name}}Names() {
