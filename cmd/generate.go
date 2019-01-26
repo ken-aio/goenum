@@ -33,7 +33,7 @@ type generateTmplData struct {
 	PackageName string
 	Name        string
 	Description string
-	Values      map[string]string
+	Values      yaml.MapSlice
 }
 
 func generateCmd(name string) *cobra.Command {

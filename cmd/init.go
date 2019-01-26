@@ -98,13 +98,13 @@ type {{.Name}} int
 // {{.Name}} enum
 const (
 	Unknown{{.Name}} {{.Name}} = iota
-{{range $k, $v := .Values}}	{{$k}}
+{{range .Values}}	{{.Key}}
 {{end}})
 
 // {{.Name}}Names is return all {{.Name}} enum names.
 func {{.Name}}Names() []string {
 	return []string{
-		"unknown",{{range $k, $v := .Values}}"{{$v}}",{{end}}
+		"unknown",{{range .Values}}"{{.Value}}",{{end}}
 	}
 }
 
